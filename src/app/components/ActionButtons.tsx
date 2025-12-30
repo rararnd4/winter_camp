@@ -1,18 +1,21 @@
 import React from 'react';
 import { Navigation, Building2 } from 'lucide-react';
 
-const SHELTER_LOCATION = {
-  name: '서울시청 본관',
-  latitude: 37.5665,
-  longitude: 126.9780,
-};
-
 interface ActionButtonsProps {
   userLocation: { latitude: number; longitude: number } | null;
   onShowRoute: () => void;
+  onShowBuildingInfo: () => void;
+  shelterData: {
+    id: string;
+  } | null;
 }
 
-export function ActionButtons({ userLocation, onShowRoute }: ActionButtonsProps) {
+export function ActionButtons({
+  userLocation,
+  onShowRoute,
+  onShowBuildingInfo,
+  shelterData
+}: ActionButtonsProps) {
   return (
     <div className="space-y-3 pb-8">
       {/* 대피 경로 보기 버튼 */}
@@ -26,7 +29,11 @@ export function ActionButtons({ userLocation, onShowRoute }: ActionButtonsProps)
       </button>
 
       {/* 건물 정보 보기 버튼 */}
-      <button className="w-full bg-[#1a1a1a] hover:bg-[#252525] text-white font-semibold py-5 px-6 rounded-xl flex items-center justify-center gap-3 transition-all border-2 border-gray-600 hover:border-gray-500 active:scale-95 min-h-[56px]">
+      <button
+        onClick={onShowBuildingInfo}
+        disabled={!shelterData}
+        className="w-full bg-[#1a1a1a] hover:bg-[#252525] text-white font-semibold py-5 px-6 rounded-xl flex items-center justify-center gap-3 transition-all border-2 border-gray-600 hover:border-gray-500 active:scale-95 min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <Building2 className="w-6 h-6" />
         <span className="text-lg">건물 정보 보기</span>
       </button>

@@ -12,18 +12,15 @@ declare global {
 
 const KAKAO_MAP_API_KEY = '50bfd9f0c3929d6ad2f2f5e81198ca92';
 
-// 예시 대피 건물 정보 (AlertCard의 '긴급' 단계에 있는 서울시청 본관)
-const SHELTER_LOCATION = {
-  name: '서울시청 본관',
-  latitude: 37.5665,
-  longitude: 126.9780,
-};
-
 interface MapViewProps {
   onLocationChange: (location: { latitude: number; longitude: number } | null) => void;
+  shelterData: {
+    latitude: number;
+    longitude: number;
+  } | null;
 }
 
-export function MapView({ onLocationChange }: MapViewProps) {
+export function MapView({ onLocationChange, shelterData }: MapViewProps) {
   const [showMap, setShowMap] = useState(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
@@ -88,10 +85,10 @@ export function MapView({ onLocationChange }: MapViewProps) {
   // 지도 생성 및 업데이트 로직
   useEffect(() => {
     // 스크립트 로딩, 지도 표시 여부, 위치 정보가 모두 준비되면 실행
-    if (isScriptLoaded && showMap && location && mapContainerRef.current) {
+    if (isScriptLoaded && showMap && location && shelterData && mapContainerRef.current) {
       window.kakao.maps.load(() => {
         const userPosition = new window.kakao.maps.LatLng(location.latitude, location.longitude);
-        const shelterPosition = new window.kakao.maps.LatLng(SHELTER_LOCATION.latitude, SHELTER_LOCATION.longitude);
+        const shelterPosition = new window.kakao.maps.LatLng(shelterData.latitude, shelterData.longitude);
         
         // 지도가 아직 생성되지 않았다면 새로 생성
         if (!mapRef.current) {
@@ -134,7 +131,7 @@ export function MapView({ onLocationChange }: MapViewProps) {
         currentMap.setBounds(bounds);
       });
     }
-  }, [isScriptLoaded, showMap, location]);
+  }, [isScriptLoaded, showMap, location, shelterData]);
 
   return (
     <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl overflow-hidden">

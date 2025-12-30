@@ -1,26 +1,25 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
-const SHELTER_LOCATION = {
-  name: '서울시청 본관',
-  latitude: 37.5665,
-  longitude: 126.9780,
-};
-
 interface RouteModalProps {
   show: boolean;
   onClose: () => void;
   userLocation: { latitude: number; longitude: number } | null;
+  shelterData: {
+    name: string;
+    latitude: number;
+    longitude: number;
+  } | null;
 }
 
-export function RouteModal({ show, onClose, userLocation }: RouteModalProps) {
-  if (!userLocation) {
+export function RouteModal({ show, onClose, userLocation, shelterData }: RouteModalProps) {
+  if (!userLocation || !shelterData) {
     return null;
   }
 
   const startName = encodeURIComponent('현재위치');
-  const endName = encodeURIComponent(SHELTER_LOCATION.name);
-  const url = `https://map.kakao.com/link/from/${startName},${userLocation.latitude},${userLocation.longitude}/to/${endName},${SHELTER_LOCATION.latitude},${SHELTER_LOCATION.longitude}`;
+  const endName = encodeURIComponent(shelterData.name);
+  const url = `https://map.kakao.com/link/from/${startName},${userLocation.latitude},${userLocation.longitude}/to/${endName},${shelterData.latitude},${shelterData.longitude}`;
 
   return (
     <div

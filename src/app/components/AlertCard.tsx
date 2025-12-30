@@ -3,9 +3,14 @@ import { Clock, Building2, ArrowUp, CircleCheck } from 'lucide-react';
 
 interface AlertCardProps {
   alertLevel: 'safe' | 'caution' | 'warning' | 'critical';
+  shelterData: {
+    building_name: string;
+    road_address: string;
+    safe_from_floor: string;
+  } | null;
 }
 
-export function AlertCard({ alertLevel }: AlertCardProps) {
+export function AlertCard({ alertLevel, shelterData }: AlertCardProps) {
   // 각 위험 단계별 설정
   const levelConfig = {
     safe: {
@@ -16,9 +21,6 @@ export function AlertCard({ alertLevel }: AlertCardProps) {
       statusText: '대피 불필요',
       textColor: 'text-green-300',
       time: null,
-      building: '정상 상태입니다',
-      buildingDetail: '기상해일 위험 없음',
-      floor: null,
       floorBg: 'bg-green-700',
       floorBorder: 'border-green-500',
     },
@@ -30,9 +32,6 @@ export function AlertCard({ alertLevel }: AlertCardProps) {
       statusText: '상황 주시 필요',
       textColor: 'text-yellow-300',
       time: '45',
-      building: '인근 안전 건물',
-      buildingDetail: '현재 위치에서 도보 5분 (200m)',
-      floor: '2층',
       floorBg: 'bg-yellow-700',
       floorBorder: 'border-yellow-500',
     },
@@ -44,9 +43,6 @@ export function AlertCard({ alertLevel }: AlertCardProps) {
       statusText: '대피 준비 필요',
       textColor: 'text-orange-300',
       time: '25',
-      building: '광화문 빌딩',
-      buildingDetail: '현재 위치에서 도보 4분 (180m)',
-      floor: '3층',
       floorBg: 'bg-orange-700',
       floorBorder: 'border-orange-500',
     },
@@ -58,9 +54,6 @@ export function AlertCard({ alertLevel }: AlertCardProps) {
       statusText: '즉시 대피 필요',
       textColor: 'text-red-300',
       time: '12',
-      building: '서울시청 본관',
-      buildingDetail: '현재 위치에서 도보 3분 (150m)',
-      floor: '3층',
       floorBg: 'bg-red-600',
       floorBorder: 'border-red-400',
     },
@@ -83,8 +76,8 @@ export function AlertCard({ alertLevel }: AlertCardProps) {
         </div>
         
         <div className="bg-green-800/40 border border-green-500 rounded-lg p-4 mt-4">
-          <div className="text-xl font-semibold text-white">{config.building}</div>
-          <div className="text-sm text-gray-300 mt-2">{config.buildingDetail}</div>
+          <div className="text-xl font-semibold text-white">정상 상태입니다</div>
+          <div className="text-sm text-gray-300 mt-2">기상해일 위험 없음</div>
         </div>
       </div>
     );
@@ -118,10 +111,10 @@ export function AlertCard({ alertLevel }: AlertCardProps) {
           <span className="text-sm">권장 대피 건물</span>
         </div>
         <div className="text-xl font-semibold text-white">
-          {config.building}
+          {shelterData?.building_name}
         </div>
         <div className="text-sm text-gray-400 mt-1">
-          {config.buildingDetail}
+          {shelterData?.road_address}
         </div>
       </div>
 
@@ -132,7 +125,7 @@ export function AlertCard({ alertLevel }: AlertCardProps) {
             <div className="text-xs text-white/80 mb-1">최소 안전 대피 층수</div>
             <div className="text-5xl font-black text-white flex items-baseline gap-2">
               <ArrowUp className="w-8 h-8" />
-              {config.floor}
+              {shelterData?.safe_from_floor}
               <span className="text-xl">이상</span>
             </div>
           </div>
