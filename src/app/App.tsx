@@ -11,10 +11,11 @@ import getAlertLevelFromHeight, {
   setLargeWaveMultiplier,
   computeRecommendedSafeFloor,
 } from "./utils/tsunami";
+import { requestFCMToken, setupForegroundMessaging } from "../firebase";
 
 export default function App() {
   // tsunami height in meters (would normally come from an API)
-  const [tsunamiHeight, setTsunamiHeight] = useState<number>(1.2);
+  const [tsunamiHeight, setTsunamiHeight] = useState<number>(0.2);
 
   // derive alert level from tsunami height using defined thresholds
   const alertLevel = getAlertLevelFromHeight(tsunamiHeight);
@@ -43,6 +44,18 @@ export default function App() {
         } catch {}
       } catch {}
     };
+  }, []);
+
+  // Initialize Firebase Cloud Messaging
+  React.useEffect(() => {
+    const initFCM = async () => {
+      const token = await requestFCMToken();
+      if (token) {
+        console.log("FCM Token initialized:", token);
+      }
+      setupForegroundMessaging();
+    };
+    initFCM();
   }, []);
 
   // (design choice) keep dynamic alert level behavior but keep the app frame
