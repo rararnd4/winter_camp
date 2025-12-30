@@ -26,6 +26,30 @@ if (typeof window !== 'undefined' && 'Notification' in window) {
 export { app, analytics, messaging };
 
 /**
+ * 서버에 토큰 저장 함수
+ * @param token FCM 토큰
+ */
+async function saveTokenToServer(token: string) {
+  try {
+    // 🔥 실제 백엔드 API 주소로 변경해야 합니다.
+    const response = await fetch("/api/users/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    if (!response.ok) {
+      throw new Error("서버 응답 오류");
+    }
+    console.log("FCM 토큰 서버 저장 성공");
+  } catch (error) {
+    console.error("FCM 토큰 서버 저장 실패:", error);
+  }
+}
+
+/**
  * FCM 토큰 요청 함수
  * @returns FCM 토큰 또는 null
  */
@@ -45,7 +69,10 @@ export async function requestFCMToken(): Promise<string | null> {
       });
 
       console.log("FCM Token:", token);
-      // TODO: 서버에 토큰 저장
+      
+      // 서버에 토큰 저장
+      await saveTokenToServer(token);
+      
       return token;
     } else {
       console.log("알림 권한이 거부되었습니다.");
