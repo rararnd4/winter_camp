@@ -17,12 +17,11 @@ import { fetchLatestTsunamiPrediction, fetchNearestSafeBuilding } from "../api";
 export default function App() {
   // tsunami height in meters (default 0.2, updated from API)
   const [tsunamiHeight, setTsunamiHeight] = useState<number>(0.2);
+  // inundation height in meters (separated from heuristic to support API values)
+  const [inundationHeight, setInundationHeight] = useState<number>(estimateInundationHeight(0.2));
 
   // derive alert level from tsunami height using defined thresholds
   const alertLevel = getAlertLevelFromHeight(tsunamiHeight);
-
-  // estimate inundation height from tsunami height (simple heuristic)
-  const inundationHeight = estimateInundationHeight(tsunamiHeight);
 
   // compute recommended safe floor based on estimated inundation
   const recommendedSafeFloor = computeRecommendedSafeFloor(inundationHeight);
@@ -32,6 +31,7 @@ export default function App() {
   React.useEffect(() => {
     window.updateTsunamiHeight = (h: number) => {
       setTsunamiHeight(h);
+      setInundationHeight(estimateInundationHeight(h)); // Keep simulation sync
     };
     // expose multiplier setter for quick testing from console
     (window as any).setInundationMultiplier = (m: number) => {
@@ -61,10 +61,9 @@ export default function App() {
       const prediction = await fetchLatestTsunamiPrediction();
       if (prediction) {
         console.log("Latest Tsunami Prediction:", prediction);
-        // 예측된 해일 높이 또는 침수 높이 중 큰 값을 사용 (안전을 위해)
-        const height = Math.max(prediction.predicted_wave_height_m, prediction.predicted_flood_height_m);
-        // 0.2m 보다 작으면 기본값 0.2m 유지 (너무 작으면 경각심 떨어질 수 있음)
-        setTsunamiHeight(Math.max(0.2, height));
+        // API에서 반환된 값을 그대로 사용 (0이면 0으로 표시)
+        setTsunamiHeight(prediction.predicted_wave_height_m);
+        setInundationHeight(prediction.predicted_flood_height_m);
       }
     };
     initApp();

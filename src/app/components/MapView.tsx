@@ -55,9 +55,9 @@ export function MapView({ onLocationChange, shelterData }: MapViewProps) {
           }
         },
         {
-          enableHighAccuracy: true,  // 고정밀 위치 요청
-          timeout: 30000,            // 30초 대기 (권한 팝업 대기 시간 포함)
-          maximumAge: 0              // 캐시된 위치 사용 안함
+          enableHighAccuracy: false, // 배터리 소모를 줄이고 응답 속도를 높임 (실패 확률 감소)
+          timeout: 60000,            // 60초 대기 (사용자가 고민할 시간 충분히 부여)
+          maximumAge: 0
         }
       );
     } else {
