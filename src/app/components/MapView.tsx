@@ -44,7 +44,20 @@ export function MapView({ onLocationChange, shelterData }: MapViewProps) {
         },
         (error) => {
           console.error("Geolocation error: ", error);
-          alert("현재 위치를 가져올 수 없습니다.");
+          if (error.code === error.PERMISSION_DENIED) {
+            alert("위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            alert("현재 위치 정보를 사용할 수 없습니다.");
+          } else if (error.code === error.TIMEOUT) {
+            alert("위치 정보 요청 시간이 초과되었습니다.");
+          } else {
+            alert("현재 위치를 가져올 수 없습니다.");
+          }
+        },
+        {
+          enableHighAccuracy: true,  // 고정밀 위치 요청
+          timeout: 30000,            // 30초 대기 (권한 팝업 대기 시간 포함)
+          maximumAge: 0              // 캐시된 위치 사용 안함
         }
       );
     } else {
