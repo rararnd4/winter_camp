@@ -29,10 +29,14 @@ export { app, analytics, messaging };
  * 서버에 토큰 저장 함수
  * @param token FCM 토큰
  */
+/**
+ * 서버에 토큰 저장 함수
+ * @param token FCM 토큰
+ */
 async function saveTokenToServer(token: string) {
   try {
-    // 실제 백엔드 API 주소로 변경
-    const response = await fetch("https://find-safe-nearby-building.onrender.com/fcm-token", {
+    // Vercel Rewrite & Vite Proxy를 통해 우회 (CORS 해결)
+    const response = await fetch("/api/fcm-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -64,17 +68,26 @@ export async function requestFCMToken(): Promise<string | null> {
     const permission = await Notification.requestPermission();
 
     if (permission === "granted") {
-      // 🔥 Firebase 콘솔 → 프로젝트 설정 → 클라우드 메시징 → Web Push 인증서에서 키 생성
-      const token = await getToken(messaging, {
-        vapidKey: "BFpkbbXxEvOdDthPFLUOLvpSL7QDFuNDrrJOSspumwKHMLyHsKFno9_1jkqRJOuiInZ7k0yv26Ex2T7wtq5PJWQ" // 🔥 여기에 VAPID 키를 넣으세요!
-      });
+      // 서비스 워커가 준비될 때까지 대기 (PushManager 에러 방지)
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        
+        // 🔥 Firebase 콘솔 → 프로젝트 설정 → 클라우드 메시징 → Web Push 인증서에서 키 생성
+        const token = await getToken(messaging, {
+          vapidKey: "BFpkbbXxEvOdDthPFLUOLvpSL7QDFuNDrrJOSspumwKHMLyHsKFno9_1jkqRJOuiInZ7k0yv26Ex2T7wtq5PJWQ", // 🔥 여기에 VAPID 키를 넣으세요!
+          serviceWorkerRegistration: registration, // 명시적으로 등록된 SW 전달
+        });
 
-      console.log("FCM Token:", token);
-      
-      // 서버에 토큰 저장
-      await saveTokenToServer(token);
-      
-      return token;
+        console.log("FCM Token:", token);
+        
+        // 서버에 토큰 저장
+        await saveTokenToServer(token);
+        
+        return token;
+      } else {
+        console.error("Service Worker가 지원되지 않습니다.");
+        return null;
+      }
     } else {
       console.log("알림 권한이 거부되었습니다.");
       return null;
