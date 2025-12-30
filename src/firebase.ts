@@ -70,8 +70,16 @@ export async function requestFCMToken(): Promise<string | null> {
     if (permission === "granted") {
       // 서비스 워커가 준비될 때까지 대기 (PushManager 에러 방지)
       if ('serviceWorker' in navigator) {
+        // 기존 active된 등록을 찾거나, registerServiceWorker로 등록된 것을 사용
         const registration = await navigator.serviceWorker.ready;
         
+        console.log("Service Worker Ready:", registration);
+        
+        if (!registration.pushManager) {
+          console.error("이 브라우저/환경에서는 PushManager를 지원하지 않거나 Service Worker가 올바르지 않습니다.");
+          return null;
+        }
+
         // 🔥 Firebase 콘솔 → 프로젝트 설정 → 클라우드 메시징 → Web Push 인증서에서 키 생성
         const token = await getToken(messaging, {
           vapidKey: "BFpkbbXxEvOdDthPFLUOLvpSL7QDFuNDrrJOSspumwKHMLyHsKFno9_1jkqRJOuiInZ7k0yv26Ex2T7wtq5PJWQ", // 🔥 여기에 VAPID 키를 넣으세요!

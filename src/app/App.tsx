@@ -12,9 +12,10 @@ import getAlertLevelFromHeight, {
   computeRecommendedSafeFloor,
 } from "./utils/tsunami";
 import { requestFCMToken, setupForegroundMessaging } from "../firebase";
+import { fetchLatestTsunamiPrediction, fetchNearestSafeBuilding } from "../api";
 
 export default function App() {
-  // tsunami height in meters (would normally come from an API)
+  // tsunami height in meters (default 0.2, updated from API)
   const [tsunamiHeight, setTsunamiHeight] = useState<number>(0.2);
 
   // derive alert level from tsunami height using defined thresholds
@@ -46,16 +47,27 @@ export default function App() {
     };
   }, []);
 
-  // Initialize Firebase Cloud Messaging
+  // Initialize Firebase Cloud Messaging & Fetch Tsunami Data
   React.useEffect(() => {
-    const initFCM = async () => {
+    const initApp = async () => {
+      // 1. FCM 초기화
       const token = await requestFCMToken();
       if (token) {
         console.log("FCM Token initialized:", token);
       }
       setupForegroundMessaging();
+
+      // 2. 최신 기상해일 예측 정보 가져오기
+      const prediction = await fetchLatestTsunamiPrediction();
+      if (prediction) {
+        console.log("Latest Tsunami Prediction:", prediction);
+        // 예측된 해일 높이 또는 침수 높이 중 큰 값을 사용 (안전을 위해)
+        const height = Math.max(prediction.predicted_wave_height_m, prediction.predicted_flood_height_m);
+        // 0.2m 보다 작으면 기본값 0.2m 유지 (너무 작으면 경각심 떨어질 수 있음)
+        setTsunamiHeight(Math.max(0.2, height));
+      }
     };
-    initFCM();
+    initApp();
   }, []);
 
   // (design choice) keep dynamic alert level behavior but keep the app frame
@@ -64,19 +76,42 @@ export default function App() {
     latitude: number;
     longitude: number;
   } | null>(null);
-  // API로 불러올 데이터를 시뮬레이션하는 상태
+
+  // API로 불러올 데이터를 시뮬레이션하는 상태 -> 실제 API 데이터로 교체
   const [shelterData, setShelterData] = useState({
-    // 기존 구조 유지하되 값만 교체
-    building_name: "해운대두산위브더제니스아파트",
-    // RouteModal 등에서 사용하는 간단한 'name' 필드도 추가
-    name: "해운대두산위브더제니스아파트",
-    road_address: "부산광역시 해운대구 마린시티2로 33",
-    // UI는 '층' 문자열을 기대하므로 문자열로 유지
-    safe_from_floor: "1층",
-    id: "2769",
-    latitude: 35.1566275,
+    // 기본값 (로딩 전 표시용)
+    building_name: "안전한 대피소 검색 중...",
+    name: "검색 중...",
+    road_address: "-",
+    safe_from_floor: "-", // 계산된 값으로 대체됨
+    id: "0",
+    latitude: 35.1566275, // 기본값 (부산 예시)
     longitude: 129.1450724,
   });
+
+  // 위치가 변경되면 가장 가까운 안전 건물 검색
+  React.useEffect(() => {
+    if (userLocation) {
+      const fetchShelter = async () => {
+        const result = await fetchNearestSafeBuilding(userLocation.latitude, userLocation.longitude);
+        if (result && result.results.length > 0) {
+          const nearest = result.results[0];
+          console.log("Nearest Safe Building:", nearest);
+          
+          setShelterData({
+            building_name: nearest.building_name,
+            name: nearest.building_name,
+            road_address: nearest.road_address,
+            safe_from_floor: `${nearest.safe_from_floor || 1}층`,
+            id: String(nearest.id),
+            latitude: nearest.latitude || userLocation.latitude,
+            longitude: nearest.longitude || userLocation.longitude,
+          });
+        }
+      };
+      fetchShelter();
+    }
+  }, [userLocation]);
 
   const [showRouteModal, setShowRouteModal] = useState(false);
   const [showBuildingInfoModal, setShowBuildingInfoModal] = useState(false);
@@ -84,7 +119,7 @@ export default function App() {
   // safe floor so downstream components show the updated recommendation.
   const shelterDataForDisplay = {
     ...shelterData,
-    safe_from_floor: recommendedSafeFloor,
+    safe_from_floor: recommendedSafeFloor, // API 결과보다는 현재 파고 기반 계산값 우선 사용 (더 안전함)
   };
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
