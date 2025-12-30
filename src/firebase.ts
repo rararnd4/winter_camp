@@ -31,13 +31,14 @@ export { app, analytics, messaging };
  */
 async function saveTokenToServer(token: string) {
   try {
-    // 🔥 실제 백엔드 API 주소로 변경해야 합니다.
-    const response = await fetch("/api/users/token", {
+    // 실제 백엔드 API 주소로 변경
+    const response = await fetch("https://find-safe-nearby-building.onrender.com/fcm-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ token }),
+      // API 명세에 맞춰 key를 fcm_token으로 변경
+      body: JSON.stringify({ fcm_token: token }),
     });
 
     if (!response.ok) {
