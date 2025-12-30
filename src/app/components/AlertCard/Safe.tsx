@@ -2,8 +2,20 @@ import React from "react";
 import { CircleCheck } from "lucide-react";
 import { levelConfig } from "./config";
 
-export function Safe() {
+interface ShelterData {
+  building_name?: string;
+  road_address?: string;
+}
+
+interface SafeProps {
+  shelterData?: ShelterData | null;
+}
+
+export function Safe({ shelterData }: SafeProps) {
   const config = levelConfig.safe;
+
+  const building = shelterData?.building_name ?? config.building;
+  const buildingDetail = shelterData?.road_address ?? config.buildingDetail;
 
   return (
     <div
@@ -22,12 +34,8 @@ export function Safe() {
       </div>
 
       <div className="bg-green-800/40 border border-green-500 rounded-lg p-4 mt-4">
-        <div className="text-xl font-semibold text-white">
-          {config.building}
-        </div>
-        <div className="text-sm text-gray-300 mt-2">
-          {config.buildingDetail}
-        </div>
+        <div className="text-xl font-semibold text-white">{building}</div>
+        <div className="text-sm text-gray-300 mt-2">{buildingDetail}</div>
       </div>
     </div>
   );

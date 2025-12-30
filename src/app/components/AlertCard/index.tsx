@@ -1,27 +1,34 @@
 import React from "react";
-import { Safe } from "./Safe.tsx";
-import { Caution } from "./Caution.tsx";
-import { Warning } from "./Warning.tsx";
-import { Critical } from "./Critical.tsx";
+import { Safe } from "./Safe";
+import { Caution } from "./Caution";
+import { Warning } from "./Warning";
+import { Critical } from "./Critical";
 
 export type AlertLevel = "safe" | "caution" | "warning" | "critical";
 
-interface AlertCardProps {
-  alertLevel: AlertLevel;
+interface ShelterData {
+  building_name?: string;
+  road_address?: string;
+  safe_from_floor?: string;
 }
 
-export function AlertCard({ alertLevel }: AlertCardProps) {
+interface AlertCardProps {
+  alertLevel: AlertLevel;
+  shelterData?: ShelterData | null;
+}
+
+export function AlertCard({ alertLevel, shelterData }: AlertCardProps) {
   switch (alertLevel) {
     case "safe":
-      return <Safe />;
+      return <Safe shelterData={shelterData} />;
     case "caution":
-      return <Caution />;
+      return <Caution shelterData={shelterData} />;
     case "warning":
-      return <Warning />;
+      return <Warning shelterData={shelterData} />;
     case "critical":
-      return <Critical />;
+      return <Critical shelterData={shelterData} />;
     default:
-      return <Safe />;
+      return <Safe shelterData={shelterData} />;
   }
 }
 

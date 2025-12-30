@@ -2,8 +2,22 @@ import React from "react";
 import { Clock, Building2, ArrowUp } from "lucide-react";
 import { levelConfig } from "./config";
 
-export function Critical() {
+interface ShelterData {
+  building_name?: string;
+  road_address?: string;
+  safe_from_floor?: string;
+}
+
+interface CriticalProps {
+  shelterData?: ShelterData | null;
+}
+
+export function Critical({ shelterData }: CriticalProps) {
   const config = levelConfig.critical;
+
+  const building = shelterData?.building_name ?? config.building;
+  const buildingDetail = shelterData?.road_address ?? config.buildingDetail;
+  const floor = shelterData?.safe_from_floor ?? config.floor;
 
   return (
     <div
@@ -35,12 +49,8 @@ export function Critical() {
           <Building2 className="w-5 h-5" />
           <span className="text-sm">권장 대피 건물</span>
         </div>
-        <div className="text-xl font-semibold text-white">
-          {config.building}
-        </div>
-        <div className="text-sm text-gray-400 mt-1">
-          {config.buildingDetail}
-        </div>
+        <div className="text-xl font-semibold text-white">{building}</div>
+        <div className="text-sm text-gray-400 mt-1">{buildingDetail}</div>
       </div>
 
       <div
@@ -49,11 +59,11 @@ export function Critical() {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-white/80 mb-1">
-              최소 안전 대피 층수
+              최소 안전 대피 츤수
             </div>
             <div className="text-5xl font-black text-white flex items-baseline gap-2">
               <ArrowUp className="w-8 h-8" />
-              {config.floor}
+              {floor}
               <span className="text-xl">이상</span>
             </div>
           </div>

@@ -1,7 +1,15 @@
-import React from 'react';
-import { Waves, ArrowUp, CircleAlert } from 'lucide-react';
+import React from "react";
+import { Waves, ArrowUp, CircleAlert } from "lucide-react";
 
-export function DetailCard() {
+interface DetailCardProps {
+  tsunamiHeight?: number; // meters
+  inundationHeight?: number; // meters
+}
+
+export function DetailCard({
+  tsunamiHeight = 2.8,
+  inundationHeight = 1.2,
+}: DetailCardProps) {
   return (
     <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-5">
       {/* 카드 헤더 */}
@@ -20,7 +28,9 @@ export function DetailCard() {
             </div>
             <div>
               <div className="text-xs text-gray-400">예상 해일 높이</div>
-              <div className="text-2xl font-bold text-white">2.8m</div>
+              <div className="text-2xl font-bold text-white">
+                {tsunamiHeight?.toFixed(1)}m
+              </div>
             </div>
           </div>
         </div>
@@ -33,7 +43,11 @@ export function DetailCard() {
             </div>
             <div>
               <div className="text-xs text-gray-400">침수 예상 높이</div>
-              <div className="text-2xl font-bold text-white">1.2m</div>
+              <div className="text-2xl font-bold text-white">
+                {inundationHeight && inundationHeight > 0
+                  ? `${inundationHeight.toFixed(1)}m`
+                  : "없음"}
+              </div>
             </div>
           </div>
         </div>
@@ -41,25 +55,13 @@ export function DetailCard() {
         {/* 분석 근거 */}
         <div className="bg-[#252525] rounded-lg p-4 mt-4 border border-gray-700">
           <div className="text-xs text-gray-400 mb-2">분석 근거</div>
-          <div className="text-sm text-gray-300">
-            기압 변동 기반 AI 예측
-          </div>
+          <div className="text-sm text-gray-300">기압 변동 기반 AI 예측</div>
           <div className="text-xs text-gray-500 mt-2">
             최근 3시간 기압 변동률: -15.2 hPa/h
           </div>
         </div>
 
-        {/* 추가 정보 */}
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="bg-[#252525] rounded-lg p-3 border border-gray-700">
-            <div className="text-xs text-gray-400 mb-1">풍속</div>
-            <div className="text-lg font-semibold text-white">32 m/s</div>
-          </div>
-          <div className="bg-[#252525] rounded-lg p-3 border border-gray-700">
-            <div className="text-xs text-gray-400 mb-1">조위</div>
-            <div className="text-lg font-semibold text-white">만조</div>
-          </div>
-        </div>
+        {/* 추가 정보: 풍속 및 조위 정보는 제거됨 */}
       </div>
     </div>
   );
